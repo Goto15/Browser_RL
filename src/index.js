@@ -5,7 +5,6 @@ function renderStartScreen() {
   
   window.addEventListener('keydown', MenuCursor.handleEvent);
 
-  
   document.body.appendChild(display.getContainer());
 }
 
@@ -34,9 +33,10 @@ const MenuCursor = {
   y: 5,
   move: function(direction){
     if(direction == 'up') {
-      this.y = ((this.y-1) % 3) + 5;
+      this.y = ROT.Util.mod((this.y-1-5), 3) + 5;
     } else if( direction == 'down') {
-      this.y = ((this.y+1) % 3) + 5;
+      
+      this.y = ROT.Util.mod((this.y+1-5), 3) + 5;
     }
     StartScreen.draw();
   },
@@ -45,6 +45,9 @@ const MenuCursor = {
     switch (this.y) {
       case 5:
         console.log('starting a new game');
+        window.removeEventListener('keydown', MenuCursor.handleEvent);
+        document.body.removeChild(StartScreen.display.getContainer());
+        Game.init();
         break;
       case 6:
         console.log('show high scores');
@@ -57,11 +60,13 @@ const MenuCursor = {
 
   handleEvent : function(e) {
     switch (e.keyCode) {
+      // up arrow
       case 38:
         MenuCursor.move('up');
         break;
+        // down arrow
       case 40:
-        MenuCursor.move('up');
+        MenuCursor.move('down');
         break;
       case 13:
         MenuCursor.select();
