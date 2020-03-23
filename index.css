@@ -1,0 +1,7 @@
+.menuButton {
+    text-shadow: rgba(0,0,0,0.1) -1px 0, rgba(0,0,0,0.1) 0 -1px,
+                 rgba(0,0,0,0.1) -1px 0, rgba(0,0,0,0.1) 0 -1px,
+                 rgba(0,0,0,0.1) -1px 0, rgba(0,0,0,0.1) 0 -1px;
+    color: gold;
+    background: gold;
+}
