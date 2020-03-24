@@ -12,13 +12,17 @@ const KeyEnum = {
 
 const MainMenu = {
   display: null,
-  x: 5,
-  y: 5,
+  x: null,
+  y: null,
   cursor: '>',
   cursorY: 0,
 
   init() {
     this.display = new ROT.Display({spacing: 1.1});
+    
+    this.x = Math.floor(this.display._options.width/2) - 7;
+    this.y = Math.floor(this.display._options.height/2) - 2;
+    
     window.addEventListener('keydown', MainMenu.handleEvent);
     document.body.appendChild(this.display.getContainer());
     MainMenu.draw();
@@ -59,8 +63,7 @@ const MainMenu = {
     switch (this.cursorY) {
       case 0:
         console.log('starting a new game');
-        window.removeEventListener('keydown', this.handleEvent);
-        document.body.removeChild(StartScreen.display.getContainer());
+        MainMenu.destage();
         Game.init();
         break;
       case 1:
@@ -68,8 +71,15 @@ const MainMenu = {
         break;
       case 2:
         console.log('show high scores');
+        MainMenu.destage();
+        HighScores.init();
         break;
     }
+  },
+
+  destage() {
+    window.removeEventListener('keydown', this.handleEvent);
+    document.body.removeChild(this.display.getContainer());
   },
 
   draw() {
@@ -78,6 +88,37 @@ const MainMenu = {
     this.display.drawText(MainMenu.x,MainMenu.y+1, "Load Game");
     this.display.drawText(MainMenu.x,MainMenu.y+2, "High Scores");
     this.display.drawText(MainMenu.x-1, MainMenu.y + MainMenu.cursorY, MainMenu.cursor);
+  }
+}
+
+const HighScores = {
+  display: null,
+  x: null,
+  y: null,
+  scores: [],
+
+  init() {
+    this.x = 5;
+    this.y = 5;
+    this.display = new ROT.Display({ spacing: 1.1 });
+    document.body.appendChild(this.display.getContainer());
+    this.fetchScores();
+  },
+
+  fetchScores() {
+    fetch('http://localhost:3000/games')
+      .then(res => res.json())
+      .then(games => {
+        this.scores = games;
+        this.draw();
+    })
+  },
+
+  draw() {
+    this.display.clear();
+    for(let i=0;i<this.scores.length; i++) {
+      this.display.drawText(this.x,this.y+i,`${this.scores[i].user}  -  ${this.scores[i].score}`);
+    }
   }
 }
 
