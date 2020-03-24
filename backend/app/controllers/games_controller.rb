@@ -1,9 +1,23 @@
 class GamesController < ApplicationController
   def index
-    render json: Game.all
+    games = Game.all.map do |game|
+      {
+        user: game.user.name,
+        score: game.score
+      }
+    end
+    
+    render json: games
   end
 
   def show
-    render json: Game.find(params[:id])
+    game = Game.find(params[:id])
+
+    game = {
+        user: game.user.name,
+        score: game.score
+      }
+
+    render json: game
   end
 end
