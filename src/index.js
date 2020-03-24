@@ -1,78 +1,83 @@
-function renderStartScreen() {
-  const display = StartScreen.init();
-  StartScreen.draw();
-
-  
-  window.addEventListener('keydown', MenuCursor.handleEvent);
-
-  document.body.appendChild(display.getContainer());
+const KeyEnum = {
+  ENTER: 13,
+  LEFT: 37,
+  UP: 38,
+  RIGHT: 39,
+  DOWN: 40,
+  A: 65,
+  D: 68,
+  S: 83,
+  W: 87,
 }
 
-const StartScreen = {
+const MainMenu = {
   display: null,
+  x: 5,
+  y: 5,
+  cursor: '>',
+  cursorY: 0,
 
   init() {
-    this.display = new ROT.Display({spacing: 1.1})
-    return this.display;
+    this.display = new ROT.Display({spacing: 1.1});
+    window.addEventListener('keydown', MainMenu.handleEvent);
+    document.body.appendChild(this.display.getContainer());
+    MainMenu.draw();
+  },
+
+  move: function(direction){
+    if(direction == 'up') {
+      this.cursorY = ROT.Util.mod((this.cursorY-1), 3);
+    } else if( direction == 'down') {
+      this.cursorY = ROT.Util.mod((this.cursorY+1), 3);
+    }
+
+    MainMenu.draw();
+  },
+
+  handleEvent: function(e) {
+    // Handles moving the cursor
+    switch (e.keyCode) {
+      
+      case KeyEnum.UP:
+      case KeyEnum.W:
+        MainMenu.move('up');
+        break;
+        
+      case KeyEnum.DOWN:
+      case KeyEnum.S:
+        MainMenu.move('down');
+        break;
+
+      case KeyEnum.ENTER:
+        MainMenu.select();
+      default:
+        break;
+    }
+  },
+
+  select: function() {
+    switch (this.cursorY) {
+      case 0:
+        console.log('starting a new game');
+        window.removeEventListener('keydown', this.handleEvent);
+        document.body.removeChild(StartScreen.display.getContainer());
+        Game.init();
+        break;
+      case 1:
+        console.log('show load game menu');
+        break;
+      case 2:
+        console.log('show high scores');
+        break;
+    }
   },
 
   draw() {
     this.display.clear();
-    this.display.drawText(5,5, "New Game");
-    this.display.drawText(5,6, "High Scores");
-    this.display.drawText(5,7, "Load Game");
-    this.display.drawText(MenuCursor.x, MenuCursor.y, MenuCursor.symbol);
-  }
-
-}
-
-
-const MenuCursor = {
-  symbol: '>',
-  x: 4,
-  y: 5,
-  move: function(direction){
-    if(direction == 'up') {
-      this.y = ROT.Util.mod((this.y-1-5), 3) + 5;
-    } else if( direction == 'down') {
-      
-      this.y = ROT.Util.mod((this.y+1-5), 3) + 5;
-    }
-    StartScreen.draw();
-  },
-
-  select: function() {
-    switch (this.y) {
-      case 5:
-        console.log('starting a new game');
-        window.removeEventListener('keydown', MenuCursor.handleEvent);
-        document.body.removeChild(StartScreen.display.getContainer());
-        Game.init();
-        break;
-      case 6:
-        console.log('show high scores');
-        break;
-      case 7:
-        console.log('show load game menu');
-        break;
-    }
-  },
-
-  handleEvent : function(e) {
-    switch (e.keyCode) {
-      // up arrow
-      case 38:
-        MenuCursor.move('up');
-        break;
-        // down arrow
-      case 40:
-        MenuCursor.move('down');
-        break;
-      case 13:
-        MenuCursor.select();
-      default:
-        break;
-    }
+    this.display.drawText(MainMenu.x,MainMenu.y  , "New Game");
+    this.display.drawText(MainMenu.x,MainMenu.y+1, "Load Game");
+    this.display.drawText(MainMenu.x,MainMenu.y+2, "High Scores");
+    this.display.drawText(MainMenu.x-1, MainMenu.y + MainMenu.cursorY, MainMenu.cursor);
   }
 }
 
