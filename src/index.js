@@ -3,6 +3,7 @@ const SCREEN = new ROT.Display({ spacing: 1.1 });
 
 const KeyEnum = {
   ENTER: 13,
+  SPACE: 32,
   LEFT: 37,
   UP: 38,
   RIGHT: 39,
@@ -64,6 +65,7 @@ const MainMenu = {
         break;
 
       case KeyEnum.ENTER:
+      case KeyEnum.SPACE:
         MainMenu.select();
       default:
         break;
