@@ -1,3 +1,6 @@
+
+const SCREEN = new ROT.Display({ spacing: 1.1 });
+
 const KeyEnum = {
   ENTER: 13,
   LEFT: 37,
@@ -10,25 +13,33 @@ const KeyEnum = {
   W: 87,
 }
 
+function setup() {
+  document.body.appendChild(SCREEN.getContainer());
+  MainMenu.init();
+}
+
+// for future use
+function switchViews(leaving, entering) {
+  leaving.destage();
+  entering.stage();
+}
+
 const MainMenu = {
-  display: null,
+  // display: null,
   x: null,
   y: null,
   cursor: '>',
   cursorY: 0,
 
   init() {
-    this.display = new ROT.Display({spacing: 1.1});
+    this.x = Math.floor(SCREEN._options.width/2) - 7;
+    this.y = Math.floor(SCREEN._options.height/2) - 2;
     
-    this.x = Math.floor(this.display._options.width/2) - 7;
-    this.y = Math.floor(this.display._options.height/2) - 2;
-    
-    window.addEventListener('keydown', MainMenu.handleEvent);
-    document.body.appendChild(this.display.getContainer());
-    MainMenu.draw();
+    this.stage();
+    // this.draw();
   },
 
-  move: function(direction){
+  move(direction){
     if(direction == 'up') {
       this.cursorY = ROT.Util.mod((this.cursorY-1), 3);
     } else if( direction == 'down') {
@@ -38,7 +49,7 @@ const MainMenu = {
     MainMenu.draw();
   },
 
-  handleEvent: function(e) {
+  handleEvent(e) {
     // Handles moving the cursor
     switch (e.keyCode) {
       
@@ -59,8 +70,8 @@ const MainMenu = {
     }
   },
 
-  select: function() {
-    switch (this.cursorY) {
+  select() {
+    switch (MainMenu.cursorY) {
       case 0:
         console.log('starting a new game');
         MainMenu.destage();
@@ -77,22 +88,26 @@ const MainMenu = {
     }
   },
 
+  stage() {
+    window.addEventListener('keydown', MainMenu.handleEvent);
+    MainMenu.draw();
+  },
+
   destage() {
-    window.removeEventListener('keydown', this.handleEvent);
-    document.body.removeChild(this.display.getContainer());
+    window.removeEventListener('keydown', MainMenu.handleEvent);
   },
 
   draw() {
-    this.display.clear();
-    this.display.drawText(MainMenu.x,MainMenu.y  , "New Game");
-    this.display.drawText(MainMenu.x,MainMenu.y+1, "Load Game");
-    this.display.drawText(MainMenu.x,MainMenu.y+2, "High Scores");
-    this.display.drawText(MainMenu.x-1, MainMenu.y + MainMenu.cursorY, MainMenu.cursor);
+    SCREEN.clear();
+    SCREEN.drawText(MainMenu.x,MainMenu.y  , "New Game");
+    SCREEN.drawText(MainMenu.x,MainMenu.y+1, "Load Game");
+    SCREEN.drawText(MainMenu.x,MainMenu.y+2, "High Scores");
+    SCREEN.drawText(MainMenu.x-1, MainMenu.y + MainMenu.cursorY, MainMenu.cursor);
   }
 }
 
 const HighScores = {
-  display: null,
+  // display: null,
   x: null,
   y: null,
   scores: [],
@@ -100,9 +115,8 @@ const HighScores = {
   init() {
     this.x = 5;
     this.y = 5;
-    this.display = new ROT.Display({ spacing: 1.1 });
-    document.body.appendChild(this.display.getContainer());
-    this.fetchScores();
+
+    this.stage();
   },
 
   fetchScores() {
@@ -110,26 +124,42 @@ const HighScores = {
       .then(res => res.json())
       .then(games => {
         games = games.sort((a,b) => (a.score < b.score) ? 1 : -1 )
-        console.log(games)
         this.scores = games;
+
         this.draw();
     })
   },
 
   draw() {
-    this.display.clear();
+    SCREEN.clear();
     for(let i=0;i<this.scores.length; i++) {
-      this.display.drawText(this.x,this.y+i,`${this.scores[i].user}  -  ${this.scores[i].score}`);
+      SCREEN.drawText(this.x,this.y+i,`${this.scores[i].user}  -  ${this.scores[i].score}`);
     }
   },
 
   stage() {
+
+    this.fetchScores();
     
-  }
+    // add event listeners
+    window.addEventListener('keydown', this.handleEvent);
+    // draw the screen
+    this.draw();
+  },
+
+  destage() {
+    // remove event listeners
+    window.removeEventListener('keydown', this.handleEvent);
+    // 
+  },
+
+  handleEvent() {
+    console.log('move cursor');
+  },
 }
 
 const Game = {
-  display: null,
+  // display: null,
   map: {},
   engine: null,
   player: null,
@@ -137,9 +167,10 @@ const Game = {
   ananas: null,
 
   init() {
-    this.display = new ROT.Display({ spacing: 1.1 });
-    document.body.appendChild(this.display.getContainer());
+    // this.display = new ROT.Display({ spacing: 1.1 });
+    // document.body.appendChild(this.display.getContainer());
 
+    SCREEN.clear();
     this._generateMap();
 
     const scheduler = new ROT.Scheduler.Simple();
@@ -197,7 +228,7 @@ const Game = {
       const parts = key.split(',');
       const x = parseInt(parts[0]);
       const y = parseInt(parts[1]);
-      this.display.draw(x, y, this.map[key]);
+      SCREEN.draw(x, y, this.map[key]);
     });
   },
 };
@@ -254,7 +285,7 @@ Player.prototype.handleEvent = function(e) {
     return;
   }
 
-  Game.display.draw(this._x, this._y, Game.map[`${this._x},${this._y}`]);
+  SCREEN.draw(this._x, this._y, Game.map[`${this._x},${this._y}`]);
   this._x = newX;
   this._y = newY;
   this._draw();
@@ -263,7 +294,7 @@ Player.prototype.handleEvent = function(e) {
 };
 
 Player.prototype._draw = function() {
-  Game.display.draw(this._x, this._y, '@', '#ff0');
+  SCREEN.draw(this._x, this._y, '@', '#ff0');
 };
 
 Player.prototype._checkBox = function() {
@@ -311,7 +342,7 @@ Pedro.prototype.act = function() {
   } else {
     x = path[0][0];
     y = path[0][1];
-    Game.display.draw(this._x, this._y, Game.map[`${this._x},${this._y}`]);
+    SCREEN.draw(this._x, this._y, Game.map[`${this._x},${this._y}`]);
     this._x = x;
     this._y = y;
     this._draw();
@@ -319,7 +350,7 @@ Pedro.prototype.act = function() {
 };
 
 Pedro.prototype._draw = function() {
-  Game.display.draw(this._x, this._y, 'P', 'red');
+  SCREEN.draw(this._x, this._y, 'P', 'red');
 };
 
 // Game.init();
