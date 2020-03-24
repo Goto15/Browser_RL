@@ -121,6 +121,10 @@ const HighScores = {
     for(let i=0;i<this.scores.length; i++) {
       this.display.drawText(this.x,this.y+i,`${this.scores[i].user}  -  ${this.scores[i].score}`);
     }
+  },
+
+  stage() {
+    
   }
 }
 
