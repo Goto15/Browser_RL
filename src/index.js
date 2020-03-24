@@ -1,4 +1,3 @@
-
 const SCREEN = new ROT.Display({ spacing: 1.1 });
 
 const KeyEnum = {
@@ -11,7 +10,7 @@ const KeyEnum = {
   D: 68,
   S: 83,
   W: 87,
-}
+};
 
 function setup() {
   document.body.appendChild(SCREEN.getContainer());
@@ -27,34 +26,33 @@ const MainMenu = {
 
   init() {
     // this.display = new ROT.Display({spacing: 1.1});
-    
-    this.x = Math.floor(SCREEN._options.width/2) - 7;
-    this.y = Math.floor(SCREEN._options.height/2) - 2;
-    
+
+    this.x = Math.floor(SCREEN._options.width / 2) - 7;
+    this.y = Math.floor(SCREEN._options.height / 2) - 2;
+
     window.addEventListener('keydown', MainMenu.handleEvent);
     // document.body.appendChild(SCREEN.getContainer());
     MainMenu.draw();
   },
 
-  move: function(direction){
-    if(direction == 'up') {
-      this.cursorY = ROT.Util.mod((this.cursorY-1), 3);
-    } else if( direction == 'down') {
-      this.cursorY = ROT.Util.mod((this.cursorY+1), 3);
+  move(direction) {
+    if (direction === 'up') {
+      this.cursorY = ROT.Util.mod(this.cursorY - 1, 3);
+    } else if (direction === 'down') {
+      this.cursorY = ROT.Util.mod(this.cursorY + 1, 3);
     }
 
     MainMenu.draw();
   },
 
-  handleEvent: function(e) {
+  handleEvent(e) {
     // Handles moving the cursor
     switch (e.keyCode) {
-      
       case KeyEnum.UP:
       case KeyEnum.W:
         MainMenu.move('up');
         break;
-        
+
       case KeyEnum.DOWN:
       case KeyEnum.S:
         MainMenu.move('down');
@@ -67,7 +65,7 @@ const MainMenu = {
     }
   },
 
-  select: function() {
+  select() {
     switch (this.cursorY) {
       case 0:
         console.log('starting a new game');
@@ -92,12 +90,16 @@ const MainMenu = {
 
   draw() {
     SCREEN.clear();
-    SCREEN.drawText(MainMenu.x,MainMenu.y  , "New Game");
-    SCREEN.drawText(MainMenu.x,MainMenu.y+1, "Load Game");
-    SCREEN.drawText(MainMenu.x,MainMenu.y+2, "High Scores");
-    SCREEN.drawText(MainMenu.x-1, MainMenu.y + MainMenu.cursorY, MainMenu.cursor);
-  }
-}
+    SCREEN.drawText(MainMenu.x, MainMenu.y, 'New Game');
+    SCREEN.drawText(MainMenu.x, MainMenu.y + 1, 'Load Game');
+    SCREEN.drawText(MainMenu.x, MainMenu.y + 2, 'High Scores');
+    SCREEN.drawText(
+      MainMenu.x - 1,
+      MainMenu.y + MainMenu.cursorY,
+      MainMenu.cursor
+    );
+  },
+};
 
 const HighScores = {
   // display: null,
@@ -117,24 +119,26 @@ const HighScores = {
     fetch('http://localhost:3000/games')
       .then(res => res.json())
       .then(games => {
-        games = games.sort((a,b) => (a.score < b.score) ? 1 : -1 )
-        console.log(games)
+        games = games.sort((a, b) => (a.score < b.score ? 1 : -1));
+        console.log(games);
         this.scores = games;
         this.draw();
-    })
+      });
   },
 
   draw() {
     SCREEN.clear();
-    for(let i=0;i<this.scores.length; i++) {
-      SCREEN.drawText(this.x,this.y+i,`${this.scores[i].user}  -  ${this.scores[i].score}`);
+    for (let i = 0; i < this.scores.length; i += 1) {
+      SCREEN.drawText(
+        this.x,
+        this.y + i,
+        `${this.scores[i].user}  -  ${this.scores[i].score}`
+      );
     }
   },
 
-  stage() {
-    
-  }
-}
+  stage() {},
+};
 
 const Game = {
   // display: null,
@@ -148,6 +152,7 @@ const Game = {
     // this.display = new ROT.Display({ spacing: 1.1 });
     // document.body.appendChild(this.display.getContainer());
 
+    this.map = {};
     SCREEN.clear();
     this._generateMap();
 
@@ -191,7 +196,7 @@ const Game = {
   },
 
   _generateBoxes(freeCells) {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i += 1) {
       const index = Math.floor(ROT.RNG.getUniform() * freeCells.length);
       const key = freeCells.splice(index, 1)[0];
       this.map[key] = '*';
@@ -280,9 +285,10 @@ Player.prototype._checkBox = function() {
   if (Game.map[key] !== '*') {
     alert('There is no box here!');
   } else if (key === Game.ananas) {
+    // TODO: Load new level and increment score
     alert('Hooray! You found an ananas and won this game.');
     Game.engine.lock();
-    window.removeEventListener('keydown', this);
+    Game.init();
   } else {
     alert('This box is empty :-(');
   }
@@ -314,9 +320,11 @@ Pedro.prototype.act = function() {
   astar.compute(this._x, this._y, pathCallback);
 
   path.shift();
-  if (path.length === 1) {
-    Game.engine.lock();
+  if (path.length <= 1) {
+    // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
+    Game.engine.lock();
+    Game.init();
   } else {
     x = path[0][0];
     y = path[0][1];
