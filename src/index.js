@@ -1,4 +1,5 @@
 const SCREEN = new ROT.Display({ spacing: 1.1 });
+const gamesBaseURL = 'http://localhost:3000/games';
 
 const KeyEnum = {
   ENTER: 13,
@@ -123,7 +124,7 @@ const HighScores = {
   },
 
   fetchScores() {
-    fetch('http://localhost:3000/games')
+    fetch(gamesBaseURL)
       .then(res => res.json())
       .then(games => {
         games = games.sort((a,b) => ( a.score < b.score ? 1 : -1 ));
@@ -163,6 +164,23 @@ const HighScores = {
   handleEvent() {
     console.log('move cursor');
   },
+}
+
+let SCORE = 0;
+const USER = 'Ben';
+
+function postScore(user, score) {
+  fetch(gamesBaseURL, {
+    method: 'POST',
+    headers: {
+      Accept: 'aaplication/json',
+      'Content-Type': 'application',
+    },
+    body: JSON.stringify({
+      user,
+      score,
+    }),
+  });
 }
 
 const Game = {
@@ -311,7 +329,8 @@ Player.prototype._checkBox = function() {
     alert('There is no box here!');
   } else if (key === Game.ananas) {
     // TODO: Load new level and increment score
-    alert('Hooray! You found an ananas and won this game.');
+    SCORE += 1;
+    alert(`Hooray! You found an ananas and won this game. ${SCORE}`);
     window.removeEventListener('keydown', this);
     Game.engine.lock();
     Game.init();
@@ -349,7 +368,7 @@ Pedro.prototype.act = function() {
   if (path.length <= 1) {
     // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
-    
+    postScore(USER, SCORE);
     Game.engine.lock();
     Game.init();
   } else {
