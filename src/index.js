@@ -264,7 +264,7 @@ Player.prototype.act = function() {
 
 Player.prototype.handleEvent = function(e) {
   const code = e.keyCode;
-  if (code === 13 || code === 32) {
+  if (code === KeyEnum.ENTER || code === KeyEnum.SPACE) {
     this._checkBox();
     return;
   }
@@ -312,6 +312,7 @@ Player.prototype._checkBox = function() {
   } else if (key === Game.ananas) {
     // TODO: Load new level and increment score
     alert('Hooray! You found an ananas and won this game.');
+    window.removeEventListener('keydown', this);
     Game.engine.lock();
     Game.init();
   } else {
@@ -348,6 +349,7 @@ Pedro.prototype.act = function() {
   if (path.length <= 1) {
     // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
+    
     Game.engine.lock();
     Game.init();
   } else {
