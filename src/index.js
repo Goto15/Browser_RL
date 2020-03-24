@@ -109,6 +109,8 @@ const HighScores = {
     fetch('http://localhost:3000/games')
       .then(res => res.json())
       .then(games => {
+        games = games.sort((a,b) => (a.score < b.score) ? 1 : -1 )
+        console.log(games)
         this.scores = games;
         this.draw();
     })
