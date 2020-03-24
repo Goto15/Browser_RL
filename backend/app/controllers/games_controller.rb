@@ -1,4 +1,5 @@
 class GamesController < ApplicationController
+
   def index
     games = Game.all.map do |game|
       {
@@ -20,4 +21,18 @@ class GamesController < ApplicationController
 
     render json: game
   end
+
+  def new
+  end
+
+  def create
+    game = Game.new
+    player = User.find_by_name(params[:user])
+
+    game.score = params[:score]
+    game.user = player
+
+    game.save
+  end
+
 end
