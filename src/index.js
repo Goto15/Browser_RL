@@ -1,3 +1,81 @@
+function renderStartScreen() {
+  const display = StartScreen.init();
+  StartScreen.draw();
+
+  
+  window.addEventListener('keydown', MenuCursor.handleEvent);
+
+  document.body.appendChild(display.getContainer());
+}
+
+const StartScreen = {
+  display: null,
+
+  init() {
+    this.display = new ROT.Display({spacing: 1.1})
+    return this.display;
+  },
+
+  draw() {
+    this.display.clear();
+    this.display.drawText(5,5, "New Game");
+    this.display.drawText(5,6, "High Scores");
+    this.display.drawText(5,7, "Load Game");
+    this.display.drawText(MenuCursor.x, MenuCursor.y, MenuCursor.symbol);
+  }
+
+}
+
+
+const MenuCursor = {
+  symbol: '>',
+  x: 4,
+  y: 5,
+  move: function(direction){
+    if(direction == 'up') {
+      this.y = ROT.Util.mod((this.y-1-5), 3) + 5;
+    } else if( direction == 'down') {
+      
+      this.y = ROT.Util.mod((this.y+1-5), 3) + 5;
+    }
+    StartScreen.draw();
+  },
+
+  select: function() {
+    switch (this.y) {
+      case 5:
+        console.log('starting a new game');
+        window.removeEventListener('keydown', MenuCursor.handleEvent);
+        document.body.removeChild(StartScreen.display.getContainer());
+        Game.init();
+        break;
+      case 6:
+        console.log('show high scores');
+        break;
+      case 7:
+        console.log('show load game menu');
+        break;
+    }
+  },
+
+  handleEvent : function(e) {
+    switch (e.keyCode) {
+      // up arrow
+      case 38:
+        MenuCursor.move('up');
+        break;
+        // down arrow
+      case 40:
+        MenuCursor.move('down');
+        break;
+      case 13:
+        MenuCursor.select();
+      default:
+        break;
+    }
+  }
+}
+
 const Game = {
   display: null,
   map: {},
@@ -192,4 +270,4 @@ Pedro.prototype._draw = function() {
   Game.display.draw(this._x, this._y, 'P', 'red');
 };
 
-Game.init();
+// Game.init();
