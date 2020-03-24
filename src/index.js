@@ -173,8 +173,8 @@ function postScore(user, score) {
   fetch(gamesBaseURL, {
     method: 'POST',
     headers: {
-      Accept: 'aaplication/json',
-      'Content-Type': 'application',
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
     body: JSON.stringify({
       user,
@@ -184,7 +184,7 @@ function postScore(user, score) {
 }
 
 const Game = {
-  // display: null,
+  // display: null, 
   map: {},
   engine: null,
   player: null,
