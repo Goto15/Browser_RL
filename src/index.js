@@ -149,7 +149,7 @@ function postScore(user, score) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Accept: 'aaplication/json',
+      Accept: 'application/json',
     },
     body: JSON.stringify({
       user,
