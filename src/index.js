@@ -124,6 +124,10 @@ const HighScores = {
     this.stage();
   },
 
+  addScore(user, score) {
+    this.scores.push({user, score});
+  },
+
   fetchScores() {
     fetch(gamesBaseURL)
       .then(res => res.json())
@@ -181,7 +185,7 @@ let SCORE = 0;
 const USER = 'Ben';
 
 function postScore(user, score) {
-  return fetch(gamesBaseURL, {
+  fetch(gamesBaseURL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -380,10 +384,11 @@ Pedro.prototype.act = function() {
     // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
     Game.engine.lock();
-    postScore(USER, SCORE)
-    .then( () => {
-      HighScores.stage();
-    })
+    
+    postScore(USER, SCORE);
+    HighScores.addScore(USER, SCORE);
+
+    HighScores.stage();
   } else {
     x = path[0][0];
     y = path[0][1];
