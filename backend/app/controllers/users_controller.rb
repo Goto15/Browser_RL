@@ -12,9 +12,17 @@ class UsersController < ApplicationController
   end
 
   def create
-    user = User.new
-    user.name = params[:name]
-    user.save
+    found_user = User.all.find_by(name: params[:name])
+    
+    if !(found_user.nil?)
+      user = found_user
+    else 
+      user = User.new
+      user.name = params[:name]
+      user.save
+    end
+
+    render json: user
   end
 
 end

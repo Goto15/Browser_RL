@@ -52,6 +52,12 @@ function switchViews(leaving, entering) {
   entering.stage();
 }
 
+// for future use
+function switchViews(leaving, entering) {
+  leaving.destage();
+  entering.stage();
+}
+
 const MainMenu = {
   // display: null,
   x: null,
@@ -60,9 +66,9 @@ const MainMenu = {
   cursorY: 0,
 
   init() {
-    this.x = Math.floor(SCREEN._options.width/2) - 7;
-    this.y = Math.floor(SCREEN._options.height/2) - 2;
-    
+    this.x = Math.floor(SCREEN._options.width / 2) - 7;
+    this.y = Math.floor(SCREEN._options.height / 2) - 2;
+
     this.stage();
   },
 
@@ -151,14 +157,14 @@ const HighScores = {
   },
 
   addScore(user, score) {
-    this.scores.push({user, score});
+    this.scores.push({ user, score });
   },
 
   fetchScores() {
     fetch(gamesBaseURL)
       .then(res => res.json())
       .then(games => {
-        games = games.sort((a,b) => ( a.score < b.score ? 1 : -1 ));
+        games = games.sort((a, b) => (a.score < b.score ? 1 : -1));
         this.scores = games;
 
         this.draw();
@@ -176,15 +182,15 @@ const HighScores = {
 
       // draw center bottom
       SCREEN.drawText(
-        Math.floor(SCREEN._options.width/2)-12,
-        SCREEN._options.height-2,
-        "(esc to go to main menu)")
+        Math.floor(SCREEN._options.width / 2) - 12,
+        SCREEN._options.height - 2,
+        '(esc to go to main menu)'
+      );
     }
   },
 
   stage() {
-    if(this.x == null)
-      this.init();
+    if (this.x == null) this.init();
 
     this.fetchScores();
 
@@ -200,12 +206,12 @@ const HighScores = {
   },
 
   handleEvent(e) {
-    if(e.keyCode == KeyEnum.ESC) {
+    if (e.keyCode == KeyEnum.ESC) {
       HighScores.destage();
       MainMenu.stage();
     }
   },
-}
+};
 
 let SCORE = 0;
 let USER = 'Ben';
@@ -225,7 +231,7 @@ function postScore(user, score) {
 }
 
 const Game = {
-  // display: null, 
+  // display: null,
   map: {},
   engine: null,
   player: null,
@@ -410,7 +416,6 @@ Pedro.prototype.act = function() {
     // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
     Game.engine.lock();
-    
     postScore(USER, SCORE);
     HighScores.addScore(USER, SCORE);
 
