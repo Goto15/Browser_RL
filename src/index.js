@@ -153,6 +153,9 @@ const HighScores = {
   },
 
   stage() {
+    if(this.x == null)
+      this.init();
+
     this.fetchScores();
 
     // add event listeners
@@ -178,7 +181,7 @@ let SCORE = 0;
 const USER = 'Ben';
 
 function postScore(user, score) {
-  fetch(gamesBaseURL, {
+  return fetch(gamesBaseURL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -376,9 +379,11 @@ Pedro.prototype.act = function() {
   if (path.length <= 1) {
     // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
-    postScore(USER, SCORE);
     Game.engine.lock();
-    HighScores.stage();
+    postScore(USER, SCORE)
+    .then( () => {
+      HighScores.stage();
+    })
   } else {
     x = path[0][0];
     y = path[0][1];
