@@ -1,5 +1,6 @@
 const SCREEN = new ROT.Display({ spacing: 1.1 });
 const gamesBaseURL = 'http://localhost:3000/games';
+const userBaseURL = 'http://localhost:3000/users';
 
 const KeyEnum = {
   ENTER: 13,
@@ -24,6 +25,21 @@ const KeyEnum = {
 
 // }
 
+function createUser(user){
+  fetch(userBaseURL, {
+    method: 'POST', 
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: user
+    })
+  }).then(resp => resp.json())
+  .then(json => console.log(json))
+}
+
+
 function setup() {
   // login
   const loginForm = document.createElement('form');
@@ -40,6 +56,7 @@ function setup() {
   loginForm.addEventListener('submit', e => {
     e.preventDefault();
     USER = usernameInput.value;
+    createUser(USER);
     document.body.removeChild(loginForm);
     document.body.appendChild(SCREEN.getContainer());
     MainMenu.init();
