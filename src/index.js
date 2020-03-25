@@ -159,7 +159,7 @@ function postScore(user, score) {
 }
 
 const Game = {
-  // display: null, 
+  // display: null,
   map: {},
   engine: null,
   player: null,
