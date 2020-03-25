@@ -3,6 +3,8 @@ const gamesBaseURL = 'http://localhost:3000/games';
 
 const KeyEnum = {
   ENTER: 13,
+  ESC: 27,
+  SPACE: 32,
   LEFT: 37,
   UP: 38,
   RIGHT: 39,
@@ -18,6 +20,12 @@ function setup() {
   MainMenu.init();
 }
 
+// for future use
+function switchViews(leaving, entering) {
+  leaving.destage();
+  entering.stage();
+}
+
 const MainMenu = {
   // display: null,
   x: null,
@@ -26,14 +34,10 @@ const MainMenu = {
   cursorY: 0,
 
   init() {
-    // this.display = new ROT.Display({spacing: 1.1});
-
     this.x = Math.floor(SCREEN._options.width / 2) - 7;
     this.y = Math.floor(SCREEN._options.height / 2) - 2;
 
-    window.addEventListener('keydown', MainMenu.handleEvent);
-    // document.body.appendChild(SCREEN.getContainer());
-    MainMenu.draw();
+    this.stage();
   },
 
   move(direction) {
@@ -60,6 +64,7 @@ const MainMenu = {
         break;
 
       case KeyEnum.ENTER:
+      case KeyEnum.SPACE:
         MainMenu.select();
       default:
         break;
@@ -67,7 +72,7 @@ const MainMenu = {
   },
 
   select() {
-    switch (this.cursorY) {
+    switch (MainMenu.cursorY) {
       case 0:
         console.log('starting a new game');
         MainMenu.destage();
@@ -84,9 +89,13 @@ const MainMenu = {
     }
   },
 
+  stage() {
+    window.addEventListener('keydown', MainMenu.handleEvent);
+    MainMenu.draw();
+  },
+
   destage() {
-    window.removeEventListener('keydown', this.handleEvent);
-    // document.body.removeChild(this.display.getContainer());
+    window.removeEventListener('keydown', MainMenu.handleEvent);
   },
 
   draw() {
@@ -111,9 +120,12 @@ const HighScores = {
   init() {
     this.x = 5;
     this.y = 5;
-    // this.display = new ROT.Display({ spacing: 1.1 });
-    // document.body.appendChild(this.display.getContainer());
-    this.fetchScores();
+
+    this.stage();
+  },
+
+  addScore(user, score) {
+    this.scores.push({ user, score });
   },
 
   fetchScores() {
@@ -121,8 +133,8 @@ const HighScores = {
       .then(res => res.json())
       .then(games => {
         games = games.sort((a, b) => (a.score < b.score ? 1 : -1));
-        console.log(games);
         this.scores = games;
+
         this.draw();
       });
   },
@@ -135,10 +147,38 @@ const HighScores = {
         this.y + i,
         `${this.scores[i].user}  -  ${this.scores[i].score}`
       );
+
+      // draw center bottom
+      SCREEN.drawText(
+        Math.floor(SCREEN._options.width / 2) - 12,
+        SCREEN._options.height - 2,
+        '(esc to go to main menu)'
+      );
     }
   },
 
-  stage() {},
+  stage() {
+    if (this.x == null) this.init();
+
+    this.fetchScores();
+
+    // add event listeners
+    window.addEventListener('keydown', this.handleEvent);
+
+    this.draw();
+  },
+
+  destage() {
+    // remove event listeners
+    window.removeEventListener('keydown', this.handleEvent);
+  },
+
+  handleEvent(e) {
+    if (e.keyCode == KeyEnum.ESC) {
+      HighScores.destage();
+      MainMenu.stage();
+    }
+  },
 };
 
 let SCORE = 0;
@@ -149,7 +189,7 @@ function postScore(user, score) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Accept: 'aaplication/json',
+      Accept: 'application/json',
     },
     body: JSON.stringify({
       user,
@@ -257,7 +297,7 @@ Player.prototype.act = function() {
 
 Player.prototype.handleEvent = function(e) {
   const code = e.keyCode;
-  if (code === 13 || code === 32) {
+  if (code === KeyEnum.ENTER || code === KeyEnum.SPACE) {
     this._checkBox();
     return;
   }
@@ -304,8 +344,9 @@ Player.prototype._checkBox = function() {
     alert('There is no box here!');
   } else if (key === Game.ananas) {
     // TODO: Load new level and increment score
-    alert(`Hooray! You found an ananas and won this game. ${SCORE}`);
     SCORE += 1;
+    alert(`Hooray! You found an ananas and won this game. ${SCORE}`);
+    window.removeEventListener('keydown', this);
     Game.engine.lock();
     Game.init();
   } else {
@@ -342,9 +383,12 @@ Pedro.prototype.act = function() {
   if (path.length <= 1) {
     // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
-    postScore(USER, SCORE);
     Game.engine.lock();
-    Game.init();
+
+    postScore(USER, SCORE);
+    HighScores.addScore(USER, SCORE);
+
+    HighScores.stage();
   } else {
     x = path[0][0];
     y = path[0][1];
