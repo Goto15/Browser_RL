@@ -3,6 +3,7 @@ const gamesBaseURL = 'http://localhost:3000/games';
 
 const KeyEnum = {
   ENTER: 13,
+  ESC: 27,
   SPACE: 32,
   LEFT: 37,
   UP: 38,
@@ -142,27 +143,34 @@ const HighScores = {
         this.y + i,
         `${this.scores[i].user}  -  ${this.scores[i].score}`
       );
+
+      // draw center bottom
+      SCREEN.drawText(
+        Math.floor(SCREEN._options.width/2)-12,
+        SCREEN._options.height-2,
+        "(esc to go to main menu)")
     }
   },
 
   stage() {
-
     this.fetchScores();
-    
+
     // add event listeners
     window.addEventListener('keydown', this.handleEvent);
-    // draw the screen
+
     this.draw();
   },
 
   destage() {
     // remove event listeners
     window.removeEventListener('keydown', this.handleEvent);
-    // 
   },
 
-  handleEvent() {
-    console.log('move cursor');
+  handleEvent(e) {
+    if(e.keyCode == KeyEnum.ESC) {
+      HighScores.destage();
+      MainMenu.stage();
+    }
   },
 }
 
@@ -370,7 +378,7 @@ Pedro.prototype.act = function() {
     alert('Game over - you were captured by Pedro!');
     postScore(USER, SCORE);
     Game.engine.lock();
-    Game.init();
+    HighScores.stage();
   } else {
     x = path[0][0];
     y = path[0][1];
