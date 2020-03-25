@@ -15,9 +15,35 @@ const KeyEnum = {
   W: 87,
 };
 
+// REFACTOR LATER
+// class View {
+//   constructor() {
+//     this.display = 
+//   }
+
+
+// }
+
 function setup() {
-  document.body.appendChild(SCREEN.getContainer());
-  MainMenu.init();
+  // login
+  const loginForm = document.createElement('form');
+  const usernameInput = document.createElement('input');
+  const submitBtn = document.createElement('button');
+  
+  usernameInput.placeholder = "name...";
+  submitBtn.innerText = "Start Game";
+
+  loginForm.appendChild(usernameInput);
+  loginForm.appendChild(submitBtn);
+  document.body.appendChild(loginForm);
+
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    USER = usernameInput.value;
+    document.body.removeChild(loginForm);
+    document.body.appendChild(SCREEN.getContainer());
+    MainMenu.init();
+  });
 }
 
 // for future use
@@ -182,7 +208,7 @@ const HighScores = {
 }
 
 let SCORE = 0;
-const USER = 'Ben';
+let USER = 'Ben';
 
 function postScore(user, score) {
   fetch(gamesBaseURL, {
