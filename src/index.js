@@ -15,13 +15,42 @@ const KeyEnum = {
   W: 87,
 };
 
-// REFACTOR LATER
+const DirectionEnum = {
+  LEFT: 'left',
+  UP: 'up',
+  DOWN: 'down',
+  RIGHT: 'right'
+}
+
+class Drawable {
+  constructor(x=0, y=0, what) {
+    this.x = x;
+    this.y = y;
+    this.what = what;
+  }
+}
+
 class View {
-  
-  constructor() {
-    this.display = SCREEN;
-    this.elements = [];
-    this.eventListeners = [];
+  display;
+  drawables;
+  _eventListeners;
+
+  constructor(display, drawables = []) {
+    this.display = display;
+    this.drawables = drawables;
+    this._eventListeners = [];
+  }
+
+  draw(){
+    this.drawables.forEach(this.drawElement);
+  }
+
+  drawElement(element) {
+    if (typeof(drawable.what) === String) {
+      this.display.drawText(drawable.x, drawable.y, drawable.what);
+    } else {
+      this.display.draw(drawable.x, drawable.y, drawable.what);
+    }
   }
 
   addEventListener(target, callback) {
@@ -45,6 +74,43 @@ class View {
       window.addEventListener(listener.target, listener.callback);
     });
   }
+
+  destage() {
+    this.eventListeners.forEach(listener => {
+      window.removeEventListener(listener.target, listener.callback);
+    });
+  }
+
+  switchViews(newView) {
+    this.destage();
+    newView.stage();
+  }
+}
+
+class Cursor extends Drawable{
+  xMin = 0;
+  xMax = Number.MAX_SAFE_INTEGER;
+  yMin = 0;
+  yMax = Number.MAX_SAFE_INTEGER;
+
+  constructor(x=0,y=0,symbol='>') {
+    super(x,y,symbol);
+  }
+
+  move(direction) {
+    switch (direction) {
+      case DirectionEnum.LEFT:
+        if (x-1 >= this.xMin) x -= 1; break;
+      case DirectionEnum.UP:
+        if (y+1 <= this.yMax) y += 1; break;
+      case DirectionEnum.RIGHT:
+        if (x+1 <= this.xMax) x += 1; break;
+      case DirectionEnum.DOWN:
+        if (y-1 >= this.yMin) y -= 1; break;
+      default:
+        break;
+    }
+  }
 }
 
 function setup() {
@@ -55,7 +121,6 @@ function setup() {
   
   usernameInput.placeholder = "name...";
   submitBtn.innerText = "Start Game";
-
 
   loginForm.appendChild(usernameInput);
   loginForm.appendChild(submitBtn);
@@ -70,22 +135,9 @@ function setup() {
   });
 }
 
-// for future use
-function switchViews(leaving, entering) {
-  leaving.destage();
-  entering.stage();
-}
-
-// for future use
-function switchViews(leaving, entering) {
-  leaving.destage();
-  entering.stage();
-}
 
 const MainMenu = {
-  // display: null,
-  x: null,
-  y: null,
+  view = new View({display: SCREEN}),
   cursor: '>',
   cursorY: 0,
 
