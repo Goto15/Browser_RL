@@ -16,13 +16,36 @@ const KeyEnum = {
 };
 
 // REFACTOR LATER
-// class View {
-//   constructor() {
-//     this.display = 
-//   }
+class View {
+  
+  constructor() {
+    this.display = SCREEN;
+    this.elements = [];
+    this.eventListeners = [];
+  }
 
+  addEventListener(target, callback) {
+    this.eventListeners.push({ target, callback });
+    window.addEventListener(target, callback);
+  }
 
-// }
+  removeEventListener(target, callback) {
+    for( let i=0; i<this.eventListeners.length; i++) {
+      const listener = this.eventListeners[i];
+
+      if (listener.target === target && listener.callback === callback) {
+        window.removeEventListener(target, callback);
+        this.eventListeners.splice(i,1);
+      }
+    }
+  }
+
+  stage() {
+    this.eventListeners.forEach(listener => {
+      window.addEventListener(listener.target, listener.callback);
+    });
+  }
+}
 
 function setup() {
   // login
@@ -32,6 +55,7 @@ function setup() {
   
   usernameInput.placeholder = "name...";
   submitBtn.innerText = "Start Game";
+
 
   loginForm.appendChild(usernameInput);
   loginForm.appendChild(submitBtn);
@@ -158,6 +182,7 @@ const HighScores = {
 
   addScore(user, score) {
     this.scores.push({ user, score });
+    this.scores = this.scores.sort((a, b) => (a.score < b.score ? 1 : -1));
   },
 
   fetchScores() {
