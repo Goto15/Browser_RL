@@ -20,11 +20,11 @@ const DirectionEnum = {
   LEFT: 'left',
   UP: 'up',
   DOWN: 'down',
-  RIGHT: 'right'
-}
+  RIGHT: 'right',
+};
 
 class Drawable {
-  constructor(x=0, y=0, what) {
+  constructor(x = 0, y = 0, what) {
     this.x = x;
     this.y = y;
     this.what = what;
@@ -33,7 +33,9 @@ class Drawable {
 
 class View {
   display;
+
   drawables;
+
   _eventListeners;
 
   constructor(display, drawables = []) {
@@ -50,7 +52,7 @@ class View {
     this.display.clear();
   }
 
-  draw(){
+  draw() {
     // console.log(this)
     this.display.clear();
     this.drawables.forEach(this.drawDrawable);
@@ -58,7 +60,7 @@ class View {
 
   drawDrawable(drawable) {
     // console.log("drawDrawable: ",this)
-    if (typeof(drawable.what) === 'string') {
+    if (typeof drawable.what === 'string') {
       this.display.drawText(drawable.x, drawable.y, drawable.what);
     } else {
       this.display.draw(drawable.x, drawable.y, drawable.what);
@@ -73,12 +75,12 @@ class View {
 
   removeEventListener(target, callback) {
     // console.log("View.removeEventListener: ", this)
-    for( let i=0; i<this._eventListeners.length; i++) {
+    for (let i = 0; i < this._eventListeners.length; i += 1) {
       const listener = this._eventListeners[i];
 
       if (listener.target === target && listener.callback === callback) {
         window.removeEventListener(target, callback);
-        this._eventListeners.splice(i,1);
+        this._eventListeners.splice(i, 1);
       }
     }
   }
@@ -106,36 +108,35 @@ class View {
   }
 }
 
-function createUser(user){
+function createUser(user) {
   fetch(userBaseURL, {
-    method: 'POST', 
+    method: 'POST',
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: user
-    })
-  })
+      name: user,
+    }),
+  });
   // .then(resp => resp.json())
   // .then(json => console.log(json))
 }
 
-
 function setup() {
   MainMenu.init();
   HighScores.init();
-  
+
   login();
 }
 
-const login = function(){
+const login = function() {
   const loginForm = document.createElement('form');
   const usernameInput = document.createElement('input');
   const submitBtn = document.createElement('button');
-  
-  usernameInput.placeholder = "name...";
-  submitBtn.innerText = "Start Game";
+
+  usernameInput.placeholder = 'name...';
+  submitBtn.innerText = 'Start Game';
 
   loginForm.appendChild(usernameInput);
   loginForm.appendChild(submitBtn);
@@ -150,8 +151,7 @@ const login = function(){
     document.body.appendChild(SCREEN.getContainer());
     MainMenu.view.stage();
   });
-}
-
+};
 
 const MainMenu = {
   menuItems: [],
@@ -160,31 +160,33 @@ const MainMenu = {
   view: null,
 
   init() {
-    this.menuItems.push( new Drawable(
-      Math.floor(SCREEN._options.width / 2) - 7,
-      Math.floor(SCREEN._options.height / 2) - 2,
-      'NEW GAME'
-    ));
+    this.menuItems.push(
+      new Drawable(
+        Math.floor(SCREEN._options.width / 2) - 7,
+        Math.floor(SCREEN._options.height / 2) - 2,
+        'NEW GAME'
+      )
+    );
 
-    this.menuItems.push (new Drawable(
-      this.menuItems[0].x,
-      this.menuItems[0].y+1,
-      'HIGH SCORES'
-    ));
+    this.menuItems.push(
+      new Drawable(this.menuItems[0].x, this.menuItems[0].y + 1, 'HIGH SCORES')
+    );
 
-    this.menuItems.push( new Drawable(
-      this.menuItems[0].x,
-      this.menuItems[0].y+2,
-      'LOG OUT'
-    ));
+    this.menuItems.push(
+      new Drawable(this.menuItems[0].x, this.menuItems[0].y + 2, 'LOG OUT')
+    );
 
     this.selItem = 0;
-    this.cursor = new Drawable(this.menuItems[0].x-1, this.menuItems[0].y, '>');
-    this.view = new View(SCREEN,[...this.menuItems, this.cursor]);
+    this.cursor = new Drawable(
+      this.menuItems[0].x - 1,
+      this.menuItems[0].y,
+      '>'
+    );
+    this.view = new View(SCREEN, [...this.menuItems, this.cursor]);
 
     // So 'this' is in the correct context
     this.handleEvent = this.handleEvent.bind(this);
-    
+
     this.view.addEventListener('keydown', this.handleEvent);
   },
 
@@ -195,14 +197,14 @@ const MainMenu = {
       case KeyEnum.UP:
       case KeyEnum.W:
         // debugger;
-        this.selItem = ROT.Util.mod(this.selItem-1, this.menuItems.length);
+        this.selItem = ROT.Util.mod(this.selItem - 1, this.menuItems.length);
         this.cursor.y = this.menuItems[this.selItem].y;
         this.view.draw();
         break;
 
       case KeyEnum.DOWN:
       case KeyEnum.S:
-        this.selItem = ROT.Util.mod(this.selItem+1, this.menuItems.length);
+        this.selItem = ROT.Util.mod(this.selItem + 1, this.menuItems.length);
         this.cursor.y = this.menuItems[this.selItem].y;
         this.view.draw();
         break;
@@ -239,7 +241,7 @@ const MainMenu = {
 
 const HighScores = {
   view: null,
-  scores: [], 
+  scores: [],
   cols: [],
 
   init() {
@@ -250,14 +252,14 @@ const HighScores = {
     this.handleEvent = this.handleEvent.bind(this);
 
     // Overwrite the draw function on the view for the more complex stuff.
-    this.view.draw = this.draw; 
-    
+    this.view.draw = this.draw;
+
     this.fetchScores();
 
     this.cols = [
-      {x:5,y:3},
-      {x:30,y:3},
-      {x:55,y:3}
+      { x: 5, y: 3 },
+      { x: 30, y: 3 },
+      { x: 55, y: 3 },
     ];
 
     this.view.addEventListener('keydown', this.handleEvent);
@@ -275,7 +277,7 @@ const HighScores = {
       .then(res => res.json())
       .then(games => {
         // console.log("HighScores.fetchScores.then: ",this)
-        this.view.drawables = []
+        this.view.drawables = [];
         games = games.sort((a, b) => (a.score < b.score ? 1 : -1));
 
         this.scores = games;
@@ -286,13 +288,15 @@ const HighScores = {
     // console.log("HighScores.draw: ", this)
     this.view.clear();
 
-    let end = this.scores.length < 60 ? this.scores.length : 60;
+    const end = this.scores.length < 60 ? this.scores.length : 60;
     for (let col = 0; col < this.cols.length; col++) {
-      for (let i = 0; i < 20 && col*20+i<end; i += 1) {
+      for (let i = 0; i < 20 && col * 20 + i < end; i += 1) {
         this.view.drawDrawable({
           x: this.cols[col].x,
           y: this.cols[col].y + i,
-          what: `${col*20+i+1}: ${this.scores[col * 20 + i].user}  -  ${this.scores[col*20+i].score}`
+          what: `${col * 20 + i + 1}: ${this.scores[col * 20 + i].user}  -  ${
+            this.scores[col * 20 + i].score
+          }`,
         });
       }
     }
@@ -301,14 +305,14 @@ const HighScores = {
     this.view.drawDrawable({
       x: Math.floor(SCREEN._options.width / 2) - 6,
       y: 1,
-      what: 'HIGH SCORES'
+      what: 'HIGH SCORES',
     });
 
     // draw center bottom
     this.view.drawDrawable({
       x: Math.floor(SCREEN._options.width / 2) - 12,
       y: SCREEN._options.height - 1,
-      what: '(esc to go to main menu)'
+      what: '(esc to go to main menu)',
     });
   },
 
@@ -337,7 +341,7 @@ function postScore(user, score) {
 }
 
 const Game = {
-  //display: null,
+  // display: null,
   view: null,
   map: {},
   engine: null,
@@ -416,7 +420,6 @@ const Player = function(x, y) {
   this._x = x;
   this._y = y;
   this._draw();
-
 };
 
 Player.prototype.getSpeed = function() {
