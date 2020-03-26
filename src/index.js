@@ -135,7 +135,7 @@ const login = function() {
   const usernameInput = document.createElement('input');
   const submitBtn = document.createElement('button');
 
-  usernameInput.placeholder = 'name...';
+  usernameInput.placeholder = 'Name...';
   submitBtn.innerText = 'Start Game';
 
   loginForm.appendChild(usernameInput);
@@ -289,7 +289,7 @@ const HighScores = {
     this.view.clear();
 
     const end = this.scores.length < 60 ? this.scores.length : 60;
-    for (let col = 0; col < this.cols.length; col++) {
+    for (let col = 0; col < this.cols.length; col += 1) {
       for (let i = 0; i < 20 && col * 20 + i < end; i += 1) {
         this.view.drawDrawable({
           x: this.cols[col].x,
@@ -483,16 +483,16 @@ Player.prototype._draw = function() {
 Player.prototype._checkBox = function() {
   const key = `${this._x},${this._y}`;
   if (Game.map[key] !== '*') {
-    alert('There is no box here!');
+    alert('There is no TP here!');
   } else if (key === Game.ananas) {
     // TODO: Load new level and increment score
     SCORE += 1;
-    alert(`Hooray! You found an ananas and won this game. ${SCORE}`);
+    alert(`You found the TP! Encouraged by this victory you decide to delve deeper!`);
     window.removeEventListener('keydown', this);
     Game.engine.lock();
     Game.init();
   } else {
-    alert('This box is empty :-(');
+    alert('This shelf is empty :-(');
   }
 };
 
@@ -523,7 +523,7 @@ Pedro.prototype.act = function() {
 
   path.shift();
   if (path.length <= 1) {
-    alert('Game over - you were captured by Pedro!');
+    alert('Game over - you were captured by the Toilet Tyrant!');
     Game.engine.lock();
     postScore(USER, SCORE);
     HighScores.addScore(USER, SCORE);
@@ -540,7 +540,7 @@ Pedro.prototype.act = function() {
 };
 
 Pedro.prototype._draw = function() {
-  SCREEN.draw(this._x, this._y, 'P', 'red');
+  SCREEN.draw(this._x, this._y, 'T', 'red');
 };
 
 // Game.init();

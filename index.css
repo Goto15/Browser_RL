@@ -47,3 +47,8 @@ input {
   padding: 15px 32px;
   width: 200px;
 }
+
+p {
+  color: white;
+  font-family: 'Press Start 2P', cursive;
+}
