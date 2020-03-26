@@ -144,6 +144,7 @@ const login = function(){
   loginForm.addEventListener('submit', e => {
     e.preventDefault();
     USER = usernameInput.value;
+    SCORE = 0;
     createUser(USER);
     document.body.removeChild(loginForm);
     document.body.appendChild(SCREEN.getContainer());
