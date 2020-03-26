@@ -42,14 +42,8 @@ class View {
     this.drawables = drawables;
     this._eventListeners = [];
 
-    // binding this because JavaScript's OO is f***ing broken
-    // this.draw = this.draw.bind(this);
+    // binding this because JavaScript's OO behaves oddly
     this.drawDrawable = this.drawDrawable.bind(this);
-    // this.addEventListener = this.addEventListener.bind(this);
-    // this.removeEventListener = this.removeEventListener.bind(this);
-    // this.stage = this.stage.bind(this);
-    // this.destage = this.destage.bind(this);
-    // this.switchViews = this.switchViews.bind(this);
   }
 
   clear() {
@@ -72,13 +66,13 @@ class View {
   }
 
   addEventListener(target, callback) {
-    console.log("View.addEventListener: ",this)
+    // console.log("View.addEventListener: ",this)
     this._eventListeners.push({ target, callback });
     // window.addEventListener(target, callback);
   }
 
   removeEventListener(target, callback) {
-    console.log("View.removeEventListener: ", this)
+    // console.log("View.removeEventListener: ", this)
     for( let i=0; i<this._eventListeners.length; i++) {
       const listener = this._eventListeners[i];
 
@@ -90,7 +84,7 @@ class View {
   }
 
   stage() {
-    console.log("View.stage: ", this)
+    // console.log("View.stage: ", this)
     this._eventListeners.forEach(listener => {
       // console.log("innerStage: ", this)
       window.addEventListener(listener.target, listener.callback);
@@ -100,7 +94,7 @@ class View {
   }
 
   destage() {
-    console.log("View.destage: ", this)
+    // console.log("View.destage: ", this)
     this._eventListeners.forEach(listener => {
       window.removeEventListener(listener.target, listener.callback);
     });
@@ -122,8 +116,9 @@ function createUser(user){
     body: JSON.stringify({
       name: user
     })
-  }).then(resp => resp.json())
-  .then(json => console.log(json))
+  })
+  // .then(resp => resp.json())
+  // .then(json => console.log(json))
 }
 
 
@@ -221,19 +216,19 @@ const MainMenu = {
   select() {
     switch (this.selItem) {
       case 0:
-        console.log('starting a new game');
+        // console.log('starting a new game');
         this.view.destage();
         Game.init();
         break;
 
       case 1:
-        console.log('show high scores');
+        // console.log('show high scores');
         this.view.switchViews(HighScores.view);
         // HighScores.draw();
         break;
 
       case 2:
-        console.log('logout');
+        // console.log('logout');
         this.view.destage();
         document.body.removeChild(SCREEN.getContainer());
         login();
@@ -268,17 +263,17 @@ const HighScores = {
   },
 
   addScore(user, score) {
-    console.log("HighScores.addScore: ", this);
+    // console.log("HighScores.addScore: ", this);
     this.scores.push({ user, score });
     this.scores = this.scores.sort((a, b) => (a.score < b.score ? 1 : -1));
   },
 
   fetchScores() {
-    console.log("HighScores.fetchScores: ",this)
+    // console.log("HighScores.fetchScores: ",this)
     fetch(gamesBaseURL)
       .then(res => res.json())
       .then(games => {
-        console.log("HighScores.fetchScores.then: ",this)
+        // console.log("HighScores.fetchScores.then: ",this)
         this.view.drawables = []
         games = games.sort((a, b) => (a.score < b.score ? 1 : -1));
 
@@ -287,7 +282,7 @@ const HighScores = {
   },
 
   draw() {
-    console.log("HighScores.draw: ", this)
+    // console.log("HighScores.draw: ", this)
     this.view.clear();
 
     let end = this.scores.length < 60 ? this.scores.length : 60;
