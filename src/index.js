@@ -114,9 +114,11 @@ class View {
 function setup() {
   MainMenu.init();
   HighScores.init();
-  Game.init();
-  // Login.init();
-  // login
+  
+  login();
+}
+
+const login = function(){
   const loginForm = document.createElement('form');
   const usernameInput = document.createElement('input');
   const submitBtn = document.createElement('button');
@@ -155,6 +157,12 @@ const MainMenu = {
       this.menuItems[0].x,
       this.menuItems[0].y+1,
       'HIGH SCORES'
+    ));
+
+    this.menuItems.push( new Drawable(
+      this.menuItems[0].x,
+      this.menuItems[0].y+2,
+      'LOG OUT'
     ));
 
     this.selItem = 0;
@@ -197,7 +205,8 @@ const MainMenu = {
     switch (this.selItem) {
       case 0:
         console.log('starting a new game');
-        this.view.switchViews(Game.view);
+        this.view.destage();
+        Game.init();
         break;
 
       case 1:
@@ -205,6 +214,12 @@ const MainMenu = {
         this.view.switchViews(HighScores.view);
         // HighScores.draw();
         break;
+
+      case 2:
+        console.log('logout');
+        this.view.destage();
+        document.body.removeChild(SCREEN.getContainer());
+        login();
     }
   },
 };
@@ -389,7 +404,6 @@ const Player = function(x, y) {
   this._y = y;
   this._draw();
 
-  
 };
 
 Player.prototype.getSpeed = function() {
@@ -493,13 +507,12 @@ Pedro.prototype.act = function() {
 
   path.shift();
   if (path.length <= 1) {
-    // TODO: Stop game. Send score post request. Send player to high scores.
     alert('Game over - you were captured by Pedro!');
     Game.engine.lock();
     postScore(USER, SCORE);
     HighScores.addScore(USER, SCORE);
 
-    HighScores.stage();
+    HighScores.view.stage();
   } else {
     x = path[0][0];
     y = path[0][1];
