@@ -36,17 +36,34 @@ class View {
   _eventListeners;
 
   constructor(display, drawables = []) {
+    // console.log(display, drawables)
     this.display = display;
     this.drawables = drawables;
     this._eventListeners = [];
+
+    // binding this because JavaScript's OO is f***ing broken
+    // this.draw = this.draw.bind(this);
+    this.drawDrawable = this.drawDrawable.bind(this);
+    // this.addEventListener = this.addEventListener.bind(this);
+    // this.removeEventListener = this.removeEventListener.bind(this);
+    // this.stage = this.stage.bind(this);
+    // this.destage = this.destage.bind(this);
+    // this.switchViews = this.switchViews.bind(this);
+  }
+
+  clear() {
+    this.display.clear();
   }
 
   draw(){
-    this.drawables.forEach(this.drawElement);
+    // console.log(this)
+    this.display.clear();
+    this.drawables.forEach(this.drawDrawable);
   }
 
-  drawElement(element) {
-    if (typeof(drawable.what) === String) {
+  drawDrawable(drawable) {
+    // console.log("drawDrawable: ",this)
+    if (typeof(drawable.what) === 'string') {
       this.display.drawText(drawable.x, drawable.y, drawable.what);
     } else {
       this.display.draw(drawable.x, drawable.y, drawable.what);
@@ -54,29 +71,36 @@ class View {
   }
 
   addEventListener(target, callback) {
-    this.eventListeners.push({ target, callback });
-    window.addEventListener(target, callback);
+    console.log("View.addEventListener: ",this)
+    this._eventListeners.push({ target, callback });
+    // window.addEventListener(target, callback);
   }
 
   removeEventListener(target, callback) {
-    for( let i=0; i<this.eventListeners.length; i++) {
-      const listener = this.eventListeners[i];
+    console.log("View.removeEventListener: ", this)
+    for( let i=0; i<this._eventListeners.length; i++) {
+      const listener = this._eventListeners[i];
 
       if (listener.target === target && listener.callback === callback) {
         window.removeEventListener(target, callback);
-        this.eventListeners.splice(i,1);
+        this._eventListeners.splice(i,1);
       }
     }
   }
 
   stage() {
-    this.eventListeners.forEach(listener => {
+    console.log("View.stage: ", this)
+    this._eventListeners.forEach(listener => {
+      // console.log("innerStage: ", this)
       window.addEventListener(listener.target, listener.callback);
     });
+
+    this.draw();
   }
 
   destage() {
-    this.eventListeners.forEach(listener => {
+    console.log("View.destage: ", this)
+    this._eventListeners.forEach(listener => {
       window.removeEventListener(listener.target, listener.callback);
     });
   }
@@ -87,33 +111,11 @@ class View {
   }
 }
 
-class Cursor extends Drawable{
-  xMin = 0;
-  xMax = Number.MAX_SAFE_INTEGER;
-  yMin = 0;
-  yMax = Number.MAX_SAFE_INTEGER;
-
-  constructor(x=0,y=0,symbol='>') {
-    super(x,y,symbol);
-  }
-
-  move(direction) {
-    switch (direction) {
-      case DirectionEnum.LEFT:
-        if (x-1 >= this.xMin) x -= 1; break;
-      case DirectionEnum.UP:
-        if (y+1 <= this.yMax) y += 1; break;
-      case DirectionEnum.RIGHT:
-        if (x+1 <= this.xMax) x += 1; break;
-      case DirectionEnum.DOWN:
-        if (y-1 >= this.yMin) y -= 1; break;
-      default:
-        break;
-    }
-  }
-}
-
 function setup() {
+  MainMenu.init();
+  HighScores.init();
+  Game.init();
+  // Login.init();
   // login
   const loginForm = document.createElement('form');
   const usernameInput = document.createElement('input');
@@ -131,161 +133,160 @@ function setup() {
     USER = usernameInput.value;
     document.body.removeChild(loginForm);
     document.body.appendChild(SCREEN.getContainer());
-    MainMenu.init();
+    MainMenu.view.stage();
   });
 }
 
 
 const MainMenu = {
-  view = new View({display: SCREEN}),
-  cursor: '>',
-  cursorY: 0,
+  menuItems: [],
+  selItem: 0,
+  cursor: null,
+  view: null,
 
   init() {
-    this.x = Math.floor(SCREEN._options.width / 2) - 7;
-    this.y = Math.floor(SCREEN._options.height / 2) - 2;
+    this.menuItems.push( new Drawable(
+      Math.floor(SCREEN._options.width / 2) - 7,
+      Math.floor(SCREEN._options.height / 2) - 2,
+      'NEW GAME'
+    ));
 
-    this.stage();
-  },
+    this.menuItems.push (new Drawable(
+      this.menuItems[0].x,
+      this.menuItems[0].y+1,
+      'HIGH SCORES'
+    ));
 
-  move(direction){
-    if(direction === 'up') {
-      this.cursorY = ROT.Util.mod((this.cursorY-1), 3);
-    } else if( direction === 'down') {
-      this.cursorY = ROT.Util.mod((this.cursorY+1), 3);
-    }
+    this.selItem = 0;
+    this.cursor = new Drawable(this.menuItems[0].x-1, this.menuItems[0].y, '>');
+    this.view = new View(SCREEN,[...this.menuItems, this.cursor]);
 
-    MainMenu.draw();
+    // So 'this' is in the correct context
+    this.handleEvent = this.handleEvent.bind(this);
+    
+    this.view.addEventListener('keydown', this.handleEvent);
   },
 
   handleEvent(e) {
+    // console.log("MainMenu.handleEvent ",this)
     // Handles moving the cursor
     switch (e.keyCode) {
       case KeyEnum.UP:
       case KeyEnum.W:
-        MainMenu.move('up');
+        // debugger;
+        this.selItem = ROT.Util.mod(this.selItem-1, this.menuItems.length);
+        this.cursor.y = this.menuItems[this.selItem].y;
+        this.view.draw();
         break;
 
       case KeyEnum.DOWN:
       case KeyEnum.S:
-        MainMenu.move('down');
+        this.selItem = ROT.Util.mod(this.selItem+1, this.menuItems.length);
+        this.cursor.y = this.menuItems[this.selItem].y;
+        this.view.draw();
         break;
 
       case KeyEnum.ENTER:
       case KeyEnum.SPACE:
-        MainMenu.select();
-      default:
+        this.select();
         break;
     }
   },
 
   select() {
-    switch (MainMenu.cursorY) {
+    switch (this.selItem) {
       case 0:
         console.log('starting a new game');
-        MainMenu.destage();
-        Game.init();
+        this.view.switchViews(Game.view);
         break;
+
       case 1:
-        console.log('show load game menu');
-        break;
-      case 2:
         console.log('show high scores');
-        MainMenu.destage();
-        HighScores.init();
+        this.view.switchViews(HighScores.view);
+        // HighScores.draw();
         break;
     }
-  },
-
-  stage() {
-    window.addEventListener('keydown', MainMenu.handleEvent);
-    MainMenu.draw();
-  },
-
-  destage() {
-    window.removeEventListener('keydown', MainMenu.handleEvent);
-  },
-
-  draw() {
-    SCREEN.clear();
-    SCREEN.drawText(MainMenu.x, MainMenu.y, 'New Game');
-    SCREEN.drawText(MainMenu.x, MainMenu.y + 1, 'Load Game');
-    SCREEN.drawText(MainMenu.x, MainMenu.y + 2, 'High Scores');
-    SCREEN.drawText(
-      MainMenu.x - 1,
-      MainMenu.y + MainMenu.cursorY,
-      MainMenu.cursor
-    );
   },
 };
 
 const HighScores = {
-  // display: null,
-  x: null,
-  y: null,
-  scores: [],
+  view: null,
+  scores: [], 
+  cols: [],
 
   init() {
-    this.x = 5;
-    this.y = 5;
+    this.view = new View(SCREEN);
 
-    this.stage();
+    // Make proper context for 'this'
+    this.draw = this.draw.bind(this);
+    this.handleEvent = this.handleEvent.bind(this);
+
+    // Overwrite the draw function on the view for the more complex stuff.
+    this.view.draw = this.draw; 
+    
+    this.fetchScores();
+
+    this.cols = [
+      {x:5,y:3},
+      {x:30,y:3},
+      {x:55,y:3}
+    ];
+
+    this.view.addEventListener('keydown', this.handleEvent);
   },
 
   addScore(user, score) {
+    console.log("HighScores.addScore: ", this);
     this.scores.push({ user, score });
     this.scores = this.scores.sort((a, b) => (a.score < b.score ? 1 : -1));
   },
 
   fetchScores() {
+    console.log("HighScores.fetchScores: ",this)
     fetch(gamesBaseURL)
       .then(res => res.json())
       .then(games => {
+        console.log("HighScores.fetchScores.then: ",this)
+        this.view.drawables = []
         games = games.sort((a, b) => (a.score < b.score ? 1 : -1));
-        this.scores = games;
 
-        this.draw();
+        this.scores = games;
       });
   },
 
   draw() {
-    SCREEN.clear();
-    for (let i = 0; i < this.scores.length; i += 1) {
-      SCREEN.drawText(
-        this.x,
-        this.y + i,
-        `${this.scores[i].user}  -  ${this.scores[i].score}`
-      );
+    console.log("HighScores.draw: ", this)
+    this.view.clear();
 
-      // draw center bottom
-      SCREEN.drawText(
-        Math.floor(SCREEN._options.width / 2) - 12,
-        SCREEN._options.height - 2,
-        '(esc to go to main menu)'
-      );
+    let end = this.scores.length < 60 ? this.scores.length : 60;
+    for (let col = 0; col < this.cols.length; col++) {
+      for (let i = 0; i < 20 && col*20+i<end; i += 1) {
+        this.view.drawDrawable({
+          x: this.cols[col].x,
+          y: this.cols[col].y + i,
+          what: `${col*20+i+1}: ${this.scores[col * 20 + i].user}  -  ${this.scores[col*20+i].score}`
+        });
+      }
     }
-  },
 
-  stage() {
-    if (this.x == null) this.init();
+    // draw center top
+    this.view.drawDrawable({
+      x: Math.floor(SCREEN._options.width / 2) - 6,
+      y: 1,
+      what: 'HIGH SCORES'
+    });
 
-    this.fetchScores();
-
-    // add event listeners
-    window.addEventListener('keydown', this.handleEvent);
-
-    this.draw();
-  },
-
-  destage() {
-    // remove event listeners
-    window.removeEventListener('keydown', this.handleEvent);
+    // draw center bottom
+    this.view.drawDrawable({
+      x: Math.floor(SCREEN._options.width / 2) - 12,
+      y: SCREEN._options.height - 1,
+      what: '(esc to go to main menu)'
+    });
   },
 
   handleEvent(e) {
     if (e.keyCode == KeyEnum.ESC) {
-      HighScores.destage();
-      MainMenu.stage();
+      this.view.switchViews(MainMenu.view);
     }
   },
 };
@@ -308,7 +309,8 @@ function postScore(user, score) {
 }
 
 const Game = {
-  // display: null,
+  //display: null,
+  view: null,
   map: {},
   engine: null,
   player: null,
@@ -316,11 +318,10 @@ const Game = {
   ananas: null,
 
   init() {
-    // this.display = new ROT.Display({ spacing: 1.1 });
-    // document.body.appendChild(this.display.getContainer());
+    this.view = new View(SCREEN);
 
     this.map = {};
-    SCREEN.clear();
+    this.view.clear();
     this._generateMap();
 
     const scheduler = new ROT.Scheduler.Simple();
@@ -387,6 +388,8 @@ const Player = function(x, y) {
   this._x = x;
   this._y = y;
   this._draw();
+
+  
 };
 
 Player.prototype.getSpeed = function() {
