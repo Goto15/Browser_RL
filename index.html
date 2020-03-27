@@ -10,7 +10,17 @@
   <script src="./src/index.js"></script>
 </head>
 <body onload="setup()">
-  <h1>The Trouble with TP</h1>
-  <p>Brave survivor (<span style='color: gold;'>@</span>) of the apocalypse! Heed the call! Travel (&larr;, &uarr;, &darr;, &rarr;, OR w, a, s, d) through the vast dungeon of the Toilet Tyrant (<span style='color: red;'>T</span>)! Search (enter, spacebar) his shelves (*) for the long lost rolls of paper!</p>
+  <div id='main'>
+    <h1>The Trouble with TP</h1>
+    <p id='flavor-text'>Brave survivor (<span style='color: gold;'>@</span>) of the apocalypse! Heed the call! Travel (&larr;, &uarr;, &darr;, &rarr;, OR w, a, s, d) through the vast dungeon of the Toilet Tyrant (<span style='color: red;'>T</span>)! Search (enter, spacebar) his shelves (*) for the long lost rolls of paper!</p>
+    <div id='legend' style='display: none;'>You = <span style='color: gold;'>@</span> <br> Bad Guy = <span style='color: red;'>T</span> <br> Shelves = * <br>
+    Search a Shelf = Press 'enter' or 'spacebar' while standing on a shelf.<br> <span style='color: red;'>DON'T GET CAUGHT!!!</span></div>
+  </div>
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id='popup-content'></div>
+    </div>
+  </div>
 </body>
 </html>

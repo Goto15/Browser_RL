@@ -134,8 +134,10 @@ const login = function() {
   const loginForm = document.createElement('form');
   const usernameInput = document.createElement('input');
   const submitBtn = document.createElement('button');
+  const flavorText = document.getElementById('flavor-text');
+  const legend = document.getElementById('legend');
 
-  usernameInput.placeholder = 'Name...';
+  usernameInput.placeholder = 'Enter Name';
   submitBtn.innerText = 'Start Game';
 
   loginForm.appendChild(usernameInput);
@@ -147,6 +149,8 @@ const login = function() {
     USER = usernameInput.value;
     SCORE = 0;
     createUser(USER);
+    flavorText.style.display = 'none';
+    legend.style.display = 'inline';
     document.body.removeChild(loginForm);
     document.body.appendChild(SCREEN.getContainer());
     MainMenu.view.stage();
@@ -340,6 +344,26 @@ function postScore(user, score) {
   });
 }
 
+function displayModal(text) {
+  const modal = document.getElementById('myModal');
+  modal.style.display = 'block';
+  const span = document.getElementsByClassName('close')[0];
+  const content = document.getElementById('popup-content');
+  content.innerText = text;
+
+  console.log('AAAAAAAAAAAHHHHHHHH');
+
+  span.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  window.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
 const Game = {
   // display: null,
   view: null,
@@ -483,16 +507,18 @@ Player.prototype._draw = function() {
 Player.prototype._checkBox = function() {
   const key = `${this._x},${this._y}`;
   if (Game.map[key] !== '*') {
-    alert('There is no TP here!');
+    displayModal('There is no TP here!');
   } else if (key === Game.ananas) {
     // TODO: Load new level and increment score
     SCORE += 1;
-    alert(`You found the TP! Encouraged by this victory you decide to delve deeper!`);
+    displayModal(
+      `You found the TP! Encouraged by this victory you decide to delve deeper!`
+    );
     window.removeEventListener('keydown', this);
     Game.engine.lock();
     Game.init();
   } else {
-    alert('This shelf is empty :-(');
+    displayModal('This shelf is empty :-(');
   }
 };
 
@@ -523,7 +549,7 @@ Pedro.prototype.act = function() {
 
   path.shift();
   if (path.length <= 1) {
-    alert('Game over - you were captured by the Toilet Tyrant!');
+    displayModal('Game over - you were captured by the Toilet Tyrant!');
     Game.engine.lock();
     postScore(USER, SCORE);
     HighScores.addScore(USER, SCORE);
