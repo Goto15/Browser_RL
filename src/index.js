@@ -247,6 +247,9 @@ const HighScores = {
   view: null,
   scores: [],
   cols: [],
+  menuItems: [],
+  selItem: 0,
+  cursor: null,
 
   init() {
     this.view = new View(SCREEN);
@@ -265,6 +268,30 @@ const HighScores = {
       { x: 30, y: 3 },
       { x: 55, y: 3 },
     ];
+
+    this.menuItems.push({
+      x: Math.floor(SCREEN._options.width / 2) - 16,
+      y: SCREEN._options.height - 1,
+      what: 'MAIN MENU',
+    });
+
+    this.menuItems.push({ 
+      x: Math.floor(SCREEN._options.width / 2) - 4,
+      y: SCREEN._options.height - 1,
+      what: 'NEW GAME',
+    });
+
+    this.menuItems.push({
+      x: Math.floor(SCREEN._options.width / 2) + 7,
+      y: SCREEN._options.height - 1, 
+      what: 'LOG OUT'
+    })
+
+    this.cursor = new Drawable(
+      this.menuItems[0].x - 1,
+      this.menuItems[0].y,
+      '>'
+    );
 
     this.view.addEventListener('keydown', this.handleEvent);
   },
@@ -305,6 +332,12 @@ const HighScores = {
       }
     }
 
+    this.menuItems.forEach(item => {
+      this.view.drawDrawable(item);
+    })
+
+    this.view.drawDrawable(this.cursor);
+
     // draw center top
     this.view.drawDrawable({
       x: Math.floor(SCREEN._options.width / 2) - 6,
@@ -312,20 +345,59 @@ const HighScores = {
       what: 'HIGH SCORES',
     });
 
-    // draw center bottom
-    this.view.drawDrawable({
-      x: Math.floor(SCREEN._options.width / 2) - 12,
-      y: SCREEN._options.height - 1,
-      what: '(esc to go to main menu)',
-    });
+    // // draw center bottom
+    // this.view.drawDrawable({
+    //   x: Math.floor(SCREEN._options.width / 2) - 12,
+    //   y: SCREEN._options.height - 1,
+    //   what: 'Main Menu',
+    // });
   },
 
   handleEvent(e) {
-    if (e.keyCode == KeyEnum.ESC) {
-      this.view.switchViews(MainMenu.view);
+    // console.log("MainMenu.handleEvent ",this)
+    // Handles moving the cursor
+    switch (e.keyCode) {
+      case KeyEnum.LEFT:
+      case KeyEnum.A:
+        // debugger;
+        this.selItem = ROT.Util.mod(this.selItem - 1, this.menuItems.length);
+        this.cursor.x = this.menuItems[this.selItem].x - 1;
+        this.view.draw();
+        break;
+
+      case KeyEnum.RIGHT:
+      case KeyEnum.D:
+        this.selItem = ROT.Util.mod(this.selItem + 1, this.menuItems.length);
+        this.cursor.x = this.menuItems[this.selItem].x - 1;
+        this.view.draw();
+        break;
+
+      case KeyEnum.ENTER:
+      case KeyEnum.SPACE:
+        this.select();
+        break;
     }
   },
-};
+
+  select() {
+    switch (this.selItem) {
+      case 0:
+        this.view.switchViews(MainMenu.view);
+        // this.selItem = 0;
+        break;
+
+      case 1:
+        this.view.destage();
+        Game.init();
+        break;
+
+      case 2:
+        this.view.destage();
+        document.body.removeChild(SCREEN.getContainer());
+        login();
+    }
+  }
+}
 
 let SCORE = 0;
 let USER = 'Ben';
